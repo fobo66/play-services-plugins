@@ -82,10 +82,10 @@ public abstract class GoogleServicesTask extends DefaultTask {
   @TaskAction
   public void action() throws IOException {
     File quickstartFile = null;
-    String searchedLocation = System.lineSeparator();
+    StringBuilder searchedLocation = new StringBuilder(System.lineSeparator());
     for (FileSystemLocation jsonFileLoc : googleServicesJsonFiles.getElements().get()) {
       File jsonFile = jsonFileLoc.getAsFile();
-      searchedLocation = searchedLocation + jsonFile.getPath() + System.lineSeparator();
+      searchedLocation.append(jsonFile.getPath()).append(System.lineSeparator());
       if (jsonFile.isFile()) {
         quickstartFile = jsonFile;
         break;
@@ -97,7 +97,7 @@ public abstract class GoogleServicesTask extends DefaultTask {
           String.format(
               "File %s is missing. "
                   + "The Google Services Plugin cannot function without it. %n Searched Location: %s",
-              JSON_FILE_NAME, searchedLocation));
+              JSON_FILE_NAME, searchedLocation.toString()));
     }
 
     getLogger().info("Parsing json file: " + quickstartFile.getPath());
@@ -109,7 +109,7 @@ public abstract class GoogleServicesTask extends DefaultTask {
       throw new GradleException("Failed to create folder: " + intermediateDir);
     }
 
-    JsonElement root = new JsonParser().parse(Files.newReader(quickstartFile, Charsets.UTF_8));
+    JsonElement root = JsonParser.parseReader(Files.newReader(quickstartFile, Charsets.UTF_8));
 
     if (!root.isJsonObject()) {
       throw new GradleException("Malformed root json");
